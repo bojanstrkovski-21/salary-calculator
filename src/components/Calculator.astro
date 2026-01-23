@@ -1,0 +1,209 @@
+---
+// This component includes the interactive calculator
+---
+
+<div class="calculator-card">
+    <div class="input-section">
+        <div class="toggle-buttons">
+            <button class="toggle-btn active" data-mode="net">Нето → Бруто</button>
+            <button class="toggle-btn" data-mode="gross">Бруто → Нето</button>
+        </div>
+
+        <div class="input-group">
+            <label for="salary-input" id="input-label">Нето плата (МКД)</label>
+            <input 
+                type="number" 
+                id="salary-input" 
+                placeholder="Внесете износ..."
+                min="0"
+                step="100"
+            />
+        </div>
+    </div>
+
+    <div class="results-section" id="results" style="display: none;">
+        <h3>Резултати</h3>
+        
+        <div class="result-row highlight">
+            <span class="label" id="result-label">Бруто плата:</span>
+            <span class="value" id="result-value">0.00 МКД</span>
+        </div>
+
+        <div class="breakdown">
+            <h4>Придонеси и даноци</h4>
+            
+            <div class="result-row">
+                <span class="label">Пензиско (18.8%):</span>
+                <span class="value" id="pension">0.00 МКД</span>
+            </div>
+            
+            <div class="result-row">
+                <span class="label">Здравство (7.5%):</span>
+                <span class="value" id="health">0.00 МКД</span>
+            </div>
+            
+            <div class="result-row">
+                <span class="label">Невработеност (1.2%):</span>
+                <span class="value" id="unemployment">0.00 МКД</span>
+            </div>
+            
+            <div class="result-row">
+                <span class="label">Дополнително здравство (0.5%):</span>
+                <span class="value" id="additional-health">0.00 МКД</span>
+            </div>
+            
+            <div class="result-row total">
+                <span class="label">Вкупно придонеси:</span>
+                <span class="value" id="total-contributions">0.00 МКД</span>
+            </div>
+
+            <div class="result-row">
+                <span class="label">Даночна основа:</span>
+                <span class="value" id="tax-base">0.00 МКД</span>
+            </div>
+            
+            <div class="result-row">
+                <span class="label">Данок на личен доход (10%):</span>
+                <span class="value" id="income-tax">0.00 МКД</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .calculator-card {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    }
+
+    .input-section {
+        margin-bottom: 2rem;
+    }
+
+    .toggle-buttons {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .toggle-btn {
+        flex: 1;
+        padding: 0.8rem;
+        border: 2px solid #667eea;
+        background: white;
+        color: #667eea;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .toggle-btn:hover {
+        background: #f0f0ff;
+    }
+
+    .toggle-btn.active {
+        background: #667eea;
+        color: white;
+    }
+
+    .input-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    label {
+        font-weight: 600;
+        color: #333;
+        font-size: 1.1rem;
+    }
+
+    input[type="number"] {
+        padding: 1rem;
+        font-size: 1.2rem;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        transition: border-color 0.3s ease;
+    }
+
+    input[type="number"]:focus {
+        outline: none;
+        border-color: #667eea;
+    }
+
+    .results-section {
+        border-top: 2px solid #f0f0f0;
+        padding-top: 1.5rem;
+    }
+
+    .results-section h3 {
+        color: #333;
+        margin-bottom: 1rem;
+        font-size: 1.5rem;
+    }
+
+    .result-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #f5f5f5;
+    }
+
+    .result-row.highlight {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        border: none;
+        font-size: 1.2rem;
+        font-weight: 700;
+    }
+
+    .result-row.total {
+        font-weight: 700;
+        border-top: 2px solid #667eea;
+        border-bottom: 2px solid #667eea;
+        margin-top: 0.5rem;
+        color: #667eea;
+    }
+
+    .breakdown {
+        margin-top: 1.5rem;
+    }
+
+    .breakdown h4 {
+        color: #555;
+        margin-bottom: 1rem;
+        font-size: 1.1rem;
+    }
+
+    .label {
+        color: #555;
+    }
+
+    .value {
+        font-weight: 600;
+        color: #333;
+    }
+
+    @media (max-width: 600px) {
+        .calculator-card {
+            padding: 1.5rem;
+        }
+
+        .toggle-buttons {
+            flex-direction: column;
+        }
+
+        h1 {
+            font-size: 2rem;
+        }
+    }
+</style>
+
+<script src="../utils/calculator.js"></script>
