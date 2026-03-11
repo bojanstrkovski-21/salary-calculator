@@ -82,10 +82,23 @@ function calculateGrossFromNet(netSalary) {
 }
 
 /**
- * Format number to 2 decimal places with thousand separators
+ * Parse European formatted number (1.234,56) to JavaScript number
  */
-function formatCurrency(amount) {
-    return amount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+function parseFormattedValue(value) {
+    if (!value) return 0;
+    // Remove dots (thousand separators) and replace comma with dot
+    const normalized = value.replace(/\./g, '').replace(',', '.');
+    return parseFloat(normalized) || 0;
+}
+
+/**
+ * Format number with European style (dot for thousands, comma for decimal)
+ */
+function formatNumber(value) {
+    return value.toLocaleString('de-DE', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    });
 }
 
 /**
@@ -102,20 +115,21 @@ function updateUI(results, mode) {
     // Update main result based on mode
     if (mode === 'net') {
         resultLabel.textContent = 'Бруто плата:';
-        resultValue.textContent = formatCurrency(results.grossSalary) + ' МКД';
+        resultValue.textContent = formatNumber(results.grossSalary) + ' МКД';
     } else {
         resultLabel.textContent = 'Нето плата:';
-        resultValue.textContent = formatCurrency(results.netSalary) + ' МКД';
+        resultValue.textContent = formatNumber(results.netSalary) + ' МКД';
     }
     
     // Update breakdown
-    document.getElementById('pension').textContent = formatCurrency(results.pension) + ' МКД';
-    document.getElementById('health').textContent = formatCurrency(results.health) + ' МКД';
-    document.getElementById('unemployment').textContent = formatCurrency(results.unemployment) + ' МКД';
-    document.getElementById('additional-health').textContent = formatCurrency(results.additionalHealth) + ' МКД';
-    document.getElementById('total-contributions').textContent = formatCurrency(results.totalContributions) + ' МКД';
-    document.getElementById('tax-base').textContent = formatCurrency(results.taxBase) + ' МКД';
-    document.getElementById('income-tax').textContent = formatCurrency(results.incomeTax) + ' МКД';
+    document.getElementById('pension').textContent = formatNumber(results.pension) + ' МКД';
+    document.getElementById('health').textContent = formatNumber(results.health) + ' МКД';
+    document.getElementById('unemployment').textContent = formatNumber(results.unemployment) + ' МКД';
+    document.getElementById('additional-health').textContent = formatNumber(results.additionalHealth) + ' МКД';
+    document.getElementById('total-contributions').textContent = formatNumber(results.totalContributions) + ' МКД';
+    document.getElementById('personal-allowance').textContent = formatNumber(CONSTANTS.personalAllowance) + ' МКД';
+    document.getElementById('tax-base').textContent = formatNumber(results.taxBase) + ' МКД';
+    document.getElementById('income-tax').textContent = formatNumber(results.incomeTax) + ' МКД';
 }
 
 /**
@@ -126,6 +140,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const salaryInput = document.getElementById('salary-input');
     const inputLabel = document.getElementById('input-label');
     let currentMode = 'net';
+    let lastValue = '0,00';
     
     // Toggle between net and gross modes
     toggleButtons.forEach(btn => {
@@ -148,13 +163,135 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
     
-    // Calculate on input
-    salaryInput.addEventListener('input', calculate);
+    // Handle input formatting
+    function handleInput(e) {
+        let cursorPosition = e.target.selectionStart || 0;
+        const oldValue = lastValue;
+        let value = e.target.value;
+        
+        // Remove all non-digit and non-comma characters
+        let cleanValue = value.replace(/[^\d,]/g, '');
+        
+        // Count how many digits/commas were before cursor (for repositioning)
+        const beforeCursor = value.substring(0, cursorPosition);
+        const digitBeforeCursor = beforeCursor.replace(/[^\d,]/g, '').length;
+        
+        // Split by comma to handle integer and decimal parts
+        let parts = cleanValue.split(',');
+        let integerPart = parts[0] || '0';
+        let decimalPart = parts[1] || '';
+        
+        // Limit decimal to 2 digits
+        if (decimalPart.length > 2) {
+            decimalPart = decimalPart.substring(0, 2);
+        }
+        
+        // Format integer part with dots for thousands
+        let formattedInteger = '';
+        if (integerPart === '') {
+            formattedInteger = '0';
+        } else {
+            // Remove leading zeros except if it's just "0"
+            integerPart = integerPart.replace(/^0+/, '') || '0';
+            
+            // Add dots every 3 digits from right to left
+            const digits = integerPart.split('').reverse();
+            for (let i = 0; i < digits.length; i++) {
+                if (i > 0 && i % 3 === 0) {
+                    formattedInteger = '.' + formattedInteger;
+                }
+                formattedInteger = digits[i] + formattedInteger;
+            }
+        }
+        
+        // Construct final value with decimals
+        let formatted = formattedInteger;
+        if (parts.length > 1 || cleanValue.includes(',')) {
+            // User is typing decimals
+            formatted += ',' + decimalPart;
+        } else {
+            // Always show ,00 when no comma typed yet
+            formatted += ',00';
+        }
+        
+        // Update input value
+        e.target.value = formatted;
+        lastValue = formatted;
+        
+        // Calculate new cursor position
+        let newCursorPos = 0;
+        let digitCount = 0;
+        
+        // If we're typing in the integer part (before comma), position accordingly
+        if (parts.length === 1 && !cleanValue.includes(',')) {
+            // User hasn't typed comma yet, keep cursor before the ,00
+            for (let i = 0; i < formatted.length; i++) {
+                if (formatted[i] === ',') break;
+                if (/\d/.test(formatted[i])) {
+                    digitCount++;
+                }
+                if (digitCount >= digitBeforeCursor) {
+                    newCursorPos = i + 1;
+                    break;
+                }
+                newCursorPos = i + 1;
+            }
+        } else {
+            // User is typing decimals, position normally
+            for (let i = 0; i < formatted.length; i++) {
+                if (/[\d,]/.test(formatted[i])) {
+                    digitCount++;
+                }
+                if (digitCount >= digitBeforeCursor) {
+                    newCursorPos = i + 1;
+                    break;
+                }
+                newCursorPos = i + 1;
+            }
+        }
+        
+        // Set cursor position
+        e.target.setSelectionRange(newCursorPos, newCursorPos);
+        
+        // Calculate results
+        calculate();
+    }
+    
+    // Handle blur to ensure proper formatting
+    function handleBlur() {
+        const numericValue = parseFormattedValue(salaryInput.value);
+        const formatted = formatNumber(numericValue);
+        salaryInput.value = formatted;
+        lastValue = formatted;
+        calculate();
+    }
+    
+    // Handle focus - select all text
+    function handleFocus() {
+        salaryInput.select();
+    }
+    
+    // Handle keyboard events
+    function handleKeyDown(e) {
+        if (e.key === 'Enter') {
+            handleBlur();
+        }
+    }
+    
+    // Event listeners
+    salaryInput.addEventListener('input', handleInput);
+    salaryInput.addEventListener('blur', handleBlur);
+    salaryInput.addEventListener('focus', handleFocus);
+    salaryInput.addEventListener('keydown', handleKeyDown);
+    
+    // Initial setup
+    salaryInput.value = '0,00';
+    lastValue = '0,00';
     
     function calculate() {
-        const value = parseFloat(salaryInput.value);
+        const value = parseFormattedValue(salaryInput.value);
         
-        if (!value || value <= 0) {
+        if (!value || value <= 0 || isNaN(value)) {
             document.getElementById('results').style.display = 'none';
             return;
         }

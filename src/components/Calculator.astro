@@ -12,11 +12,10 @@
         <div class="input-group">
             <label for="salary-input" id="input-label">Нето плата (МКД)</label>
             <input 
-                type="number" 
+                type="text" 
                 id="salary-input" 
-                placeholder="Внесете износ..."
-                min="0"
-                step="100"
+                placeholder="0,00"
+                inputmode="decimal"
             />
         </div>
     </div>
@@ -58,6 +57,11 @@
             </div>
 
             <div class="result-row">
+                <span class="label">Лично ослободување:</span>
+                <span class="value" id="personal-allowance">0.00 МКД</span>
+            </div>
+
+            <div class="result-row">
                 <span class="label">Даночна основа:</span>
                 <span class="value" id="tax-base">0.00 МКД</span>
             </div>
@@ -72,10 +76,10 @@
 
 <style>
     .calculator-card {
-        background: white;
+        background: #2d353b;
         border-radius: 12px;
         padding: 2rem;
-        box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        box-shadow: 0 10px 40px rgba(0,0,0,0.3);
     }
 
     .input-section {
@@ -91,9 +95,9 @@
     .toggle-btn {
         flex: 1;
         padding: 0.8rem;
-        border: 2px solid #667eea;
-        background: white;
-        color: #667eea;
+        border: 2px solid #4a5053;
+        background: #343f44;
+        color: #9da9a0;
         border-radius: 8px;
         font-size: 1rem;
         font-weight: 600;
@@ -102,12 +106,14 @@
     }
 
     .toggle-btn:hover {
-        background: #f0f0ff;
+        background: #3d484d;
+        border-color: #7fbbb3;
     }
 
     .toggle-btn.active {
-        background: #667eea;
-        color: white;
+        background: #a7c080;
+        color: #2d353b;
+        border: 2px solid #a7c080;
     }
 
     .input-group {
@@ -118,30 +124,32 @@
 
     label {
         font-weight: 600;
-        color: #333;
+        color: #d3c6aa;
         font-size: 1.1rem;
     }
 
-    input[type="number"] {
+    input[type="text"] {
         padding: 1rem;
         font-size: 1.2rem;
-        border: 2px solid #e0e0e0;
+        background-color: #343f44;
+        color: #d3c6aa;
+        border: 2px solid #4a5053;
         border-radius: 8px;
         transition: border-color 0.3s ease;
     }
 
-    input[type="number"]:focus {
+    input[type="text"]:focus {
         outline: none;
-        border-color: #667eea;
+        border-color: #7fbbb3;
     }
 
     .results-section {
-        border-top: 2px solid #f0f0f0;
+        border-top: 2px solid #4a5053;
         padding-top: 1.5rem;
     }
 
     .results-section h3 {
-        color: #333;
+        color: #d3c6aa;
         margin-bottom: 1rem;
         font-size: 1.5rem;
     }
@@ -150,26 +158,35 @@
         display: flex;
         justify-content: space-between;
         padding: 0.75rem 0;
-        border-bottom: 1px solid #f5f5f5;
+        border-bottom: 1px solid #4a5053;
     }
 
     .result-row.highlight {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
+        background: #374247;
+        color: #a7c080;
         padding: 1rem;
         border-radius: 8px;
         margin-bottom: 1rem;
-        border: none;
+        border: 2px solid #a7c080;
         font-size: 1.2rem;
         font-weight: 700;
+    }
+    
+    .result-row.highlight .label {
+        color: #a7c080;
+    }
+    
+    .result-row.highlight .value {
+        color: #a7c080;
+        font-size: 1.4rem;
     }
 
     .result-row.total {
         font-weight: 700;
-        border-top: 2px solid #667eea;
-        border-bottom: 2px solid #667eea;
+        border-top: 2px solid #7fbbb3;
+        border-bottom: 2px solid #7fbbb3;
         margin-top: 0.5rem;
-        color: #667eea;
+        color: #7fbbb3;
     }
 
     .breakdown {
@@ -177,18 +194,18 @@
     }
 
     .breakdown h4 {
-        color: #555;
+        color: #d3c6aa;
         margin-bottom: 1rem;
         font-size: 1.1rem;
     }
 
     .label {
-        color: #555;
+        color: #d3c6aa;
     }
 
     .value {
         font-weight: 600;
-        color: #333;
+        color: #d3c6aa;
     }
 
     @media (max-width: 600px) {
